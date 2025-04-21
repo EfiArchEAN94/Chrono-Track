@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const reader = new Html5Qrcode("reader");
 
     reader.start(
-        {}, // default camera
+        { facingMode: "environment" }, // rear camera by default
         {
             fps: 10,
             qrbox: 250
