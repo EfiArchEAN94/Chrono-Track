@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ChronoTrack Debug Scanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { background-color: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+    #reader { width: 100%; max-width: 300px; margin: 20px auto; }
+    form { display: none; margin-top: 20px; }
+    input, button { padding: 10px; font-size: 1em; }
+    #log { margin-top: 30px; text-align: left; background: #1e1e1e; padding: 10px; border-radius: 5px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>ChronoTrack Scanner (Debug Mode)</h1>
+  <div id="reader"></div>
+  <form id="attendance-form">
+    <input type="text" placeholder="Student ID" required />
+    <button type="submit">Submit</button>
+  </form>
+  <div id="log"><strong>Debug Log:</strong><br/></div>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById('attendance-form');
+      const input = form.querySelector('input');
+      const log = document.getElementById('log');
+      const reader = new Html5Qrcode("reader");
+
+      function addLog(message) {
+        log.innerHTML += message + "<br/>";
+      }
+
+      reader.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+          document.getElementById('reader').style.display = 'none';
+          form.style.display = 'block';
+          input.focus();
+          addLog("QR Scanned: " + decodedText);
+        },
+        (errorMessage) => {
+          console.log(errorMessage);
+        }
+      );
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const studentId = input.value.trim();
+        if (!studentId) return alert("Enter your Student ID");
+
+        const now = new Date();
+        const date = now.toLocaleDateString('en-CA');
+        const time = now.toLocaleTimeString('en-GB');
+        const payload = { studentId, date, time };
+        addLog("Sending: " + JSON.stringify(payload));
+
+        fetch("https://script.google.com/macros/s/AKfycbzWVsaOl5D-eQ7aOJH6xoKPMVIrSWtGLsxvlk7iwB1_diBgLJu153aEXxpuvg309q48LA/exec", {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+        .then(response => response.text())
+        .then(result => {
+          addLog("Server response: " + result);
+          alert("Attendance recorded");
+          input.value = "";
+          form.style.display = 'none';
+          document.getElementById('reader').style.display = 'block';
+        })
+        .catch(error => {
+          addLog("Error: " + error.message);
+          alert("Error recording attendance");
+          console.error(error);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
