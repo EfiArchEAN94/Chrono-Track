@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ChronoTrack Debug Scanner</title>
+  <title>ChronoTrack Scanner (Debug)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { background-color: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
@@ -13,7 +13,7 @@
   </style>
 </head>
 <body>
-  <h1>ChronoTrack Scanner (Debug Mode)</h1>
+  <h1>ChronoTrack Debug Scanner</h1>
   <div id="reader"></div>
   <form id="attendance-form">
     <input type="text" placeholder="Student ID" required />
@@ -37,15 +37,17 @@
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         (decodedText) => {
+          addLog("QR Scanned: " + decodedText);
           document.getElementById('reader').style.display = 'none';
           form.style.display = 'block';
           input.focus();
-          addLog("QR Scanned: " + decodedText);
         },
         (errorMessage) => {
           console.log(errorMessage);
         }
-      );
+      ).catch(err => {
+        addLog("Camera start error: " + err.message);
+      });
 
       form.addEventListener('submit', function (e) {
         e.preventDefault();
