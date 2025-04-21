@@ -1,0 +1,1 @@
+// QR Code generation logic here

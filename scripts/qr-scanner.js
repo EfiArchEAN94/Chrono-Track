@@ -1,0 +1,1 @@
+// QR Code scanning logic here
